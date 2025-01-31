@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Plagio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+</head>
+<body>
+
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="#">Inicio</a></li>
+            <li><a href="#">Verificar Plagio</a></li>
+            <li><a href="#">Contacto</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Detector de Plagio</h1>
+        <p>Ingresa un texto de hasta 7000 palabras para verificar si ha sido plagiado.</p>
+        
+        <!-- Área de texto -->
+        <form id="plagiarismForm">
+            <textarea id="inputText" placeholder="Pega tu texto aquí (máx. 7000 palabras)" maxlength="7000"></textarea>
+            <p id="charCount">Número de caracteres: 0</p>
+            <button type="submit">Verificar Plagio</button>
+        </form>
+    </div>
+
+    <!-- Resultados -->
+    <div class="container results">
+        <h2>Resultados de Plagio</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fuente</th>
+                    <th>Porcentaje de Coincidencia</th>
+                </tr>
+            </thead>
+            <tbody id="resultsTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        document.getElementById("plagiarismForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            let text = document.getElementById("inputText").value;
+        
+            let response = await fetch("/verificar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ texto: text })
+            });
+        
+            let data = await response.json();
+            let resultsTable = document.getElementById("resultsTable");
+            resultsTable.innerHTML = "";
+        
+            data.resultados.forEach(resultado => {
+                let row = document.createElement("tr");
+                row.innerHTML = `<td><a href="${resultado.url}" target="_blank">${resultado.url}</a></td>
+                                 <td>${resultado.coincidencia}%</td>`;
+                resultsTable.appendChild(row);
+            });
+        });
+        
+    </script>
+
+</body>
+</html>
